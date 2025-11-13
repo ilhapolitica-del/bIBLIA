@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { BibleVerse, CrossReference } from "../types";
+import { BibleVerse, CrossReference, CommentaryContent } from "../types";
 
 const getGeminiClient = () => {
   const apiKey = process.env.API_KEY;
@@ -10,7 +10,7 @@ const getGeminiClient = () => {
   return new GoogleGenAI({ apiKey });
 };
 
-export const generateCatholicCommentary = async (verse: BibleVerse): Promise<string> => {
+export const generateCatholicCommentary = async (verse: BibleVerse): Promise<CommentaryContent> => {
   const ai = getGeminiClient();
   if (!ai) {
     throw new Error("Chave de API não configurada.");
@@ -19,28 +19,55 @@ export const generateCatholicCommentary = async (verse: BibleVerse): Promise<str
   const prompt = `
     Atue como um teólogo católico especialista, fiel ao Magistério da Igreja Católica Romana, à Sagrada Tradição e ao Catecismo da Igreja Católica (CIC).
     
-    Forneça um breve comentário teológico e pastoral sobre a seguinte passagem bíblica:
+    Analise a seguinte passagem bíblica:
     Livro: ${verse.book}
     Capítulo: ${verse.chapter}
     Versículo: ${verse.verse}
     Texto: "${verse.text}"
 
+    Forneça uma resposta estruturada com dois componentes distintos:
+    
+    1. COMENTÁRIO TEOLÓGICO: Uma explicação espiritual e doutrinária, concisa (aprox. 150 palavras).
+    2. SABEDORIA PATRÍSTICA: Uma citação, interpretação ou ensinamento específico de um dos Pais da Igreja (ex: Santo Agostinho, São João Crisóstomo, São Jerônimo, Santo Ambrósio) que se relacione diretamente com este texto ou tema. Identifique claramente quem é o Santo/Padre.
+
     Diretrizes:
-    1. O tom deve ser reverente, espiritual e educativo.
-    2. Explique o significado do texto à luz da fé católica.
-    3. Se relevante, faça breves conexões com os Padres da Igreja, Santos ou o Catecismo.
-    4. Mantenha o texto conciso, com no máximo 250 palavras.
-    5. Evite interpretações puramente seculares ou protestantes que contradigam a doutrina católica.
-    6. Formate a resposta em texto corrido, elegante, sem marcadores excessivos.
+    - Tom reverente e educativo.
+    - Fidelidade total à doutrina católica.
   `;
+
+  const responseSchema = {
+    type: Type.OBJECT,
+    properties: {
+      theological: {
+        type: Type.STRING,
+        description: "Comentário teológico e pastoral geral sobre o versículo."
+      },
+      patristic: {
+        type: Type.STRING,
+        description: "O conteúdo do ensinamento ou citação do Padre da Igreja."
+      },
+      patristicSource: {
+        type: Type.STRING,
+        description: "Nome do Padre da Igreja (ex: 'Santo Agostinho')."
+      }
+    },
+    required: ["theological", "patristic", "patristicSource"]
+  };
 
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: responseSchema,
+      }
     });
     
-    return response.text || "Não foi possível gerar o comentário no momento.";
+    if (response.text) {
+      return JSON.parse(response.text) as CommentaryContent;
+    }
+    throw new Error("Resposta vazia.");
   } catch (error) {
     console.error("Erro ao gerar comentário:", error);
     throw new Error("Erro ao conectar com o serviço de teologia.");

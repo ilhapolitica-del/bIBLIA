@@ -104,13 +104,13 @@ const App: React.FC = () => {
       crossReferences: null
     });
 
-    // 1. Fetch Commentary
+    // 1. Fetch Commentary (Theological + Patristic)
     generateCatholicCommentary(verse)
-      .then(text => {
+      .then(data => {
         setCommentary(prev => ({
           ...prev,
           isLoading: false,
-          content: text,
+          content: data, // Now matches CommentaryContent interface
         }));
       })
       .catch(err => {
@@ -153,7 +153,7 @@ const App: React.FC = () => {
               Sagradas Escrituras
             </h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Pesquise na Bíblia Católica e receba explicações fundamentadas na Tradição Apostólica e no Magistério da Igreja.
+              Pesquise na Bíblia Católica e receba explicações fundamentadas na Tradição Apostólica, nos Padres da Igreja e no Magistério.
             </p>
           </div>
 
@@ -215,7 +215,7 @@ const App: React.FC = () => {
                  results.length > 0 && !isSearching && (
                    <div className="hidden lg:flex flex-col items-center justify-center h-64 text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-lg p-6 text-center">
                      <span className="text-4xl mb-2">✝️</span>
-                     <p>Selecione um versículo ao lado para ler o comentário teológico.</p>
+                     <p>Selecione um versículo ao lado para ler o comentário teológico e patrístico.</p>
                    </div>
                  )
               )}

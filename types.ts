@@ -16,9 +16,15 @@ export interface CrossReference {
   reason: string;
 }
 
+export interface CommentaryContent {
+  theological: string;
+  patristic: string;
+  patristicSource: string; // e.g., "Saint Augustine"
+}
+
 export interface CommentaryState {
   isLoading: boolean;
-  content: string | null;
+  content: CommentaryContent | null;
   error: string | null;
   forReference: string | null; // Stores "John 3:16" to ensure commentary matches view
   isCrossRefLoading: boolean;
