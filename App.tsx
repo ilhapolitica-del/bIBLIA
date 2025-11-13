@@ -13,6 +13,7 @@ import { Loader2 } from 'lucide-react';
 const App: React.FC = () => {
   const [darkMode, setDarkMode] = useState<boolean>(false);
   const [query, setQuery] = useState<string>("");
+  const [selectedBook, setSelectedBook] = useState<string>("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false); // New loading state for search
   const [selectedVerse, setSelectedVerse] = useState<BibleVerse | null>(null);
@@ -57,7 +58,7 @@ const App: React.FC = () => {
       });
 
       try {
-        const searchResults = await searchBible(query);
+        const searchResults = await searchBible(query, selectedBook);
         setResults(searchResults);
       } catch (error) {
         console.error("Search failed", error);
@@ -70,15 +71,17 @@ const App: React.FC = () => {
   // Helper to trigger search from suggestion buttons
   const triggerSearch = (text: string) => {
     setQuery(text);
-    // We need to call the search logic directly with the new text
-    // Using a small timeout ensures state is updated if we were using useEffect, 
-    // but calling a specific async function is safer.
+    // We reset the book filter for quick suggestions to ensure context works as expected
+    // or we can keep it if we want. For suggestions like "John 3:16" it implies a book, 
+    // but usually clearing the filter is safer for a global suggestion.
+    setSelectedBook(""); 
+    
     setIsSearching(true);
     setResults([]);
     setSelectedVerse(null);
     
-    // Call searchBible directly with the text
-    searchBible(text).then(res => {
+    // Call searchBible directly with the text and empty book filter
+    searchBible(text, "").then(res => {
       setResults(res);
       setIsSearching(false);
     });
@@ -161,6 +164,8 @@ const App: React.FC = () => {
             value={query} 
             onChange={setQuery} 
             onSearch={handleSearch}
+            selectedBook={selectedBook}
+            onBookChange={setSelectedBook}
           />
 
           {/* Loading State for Search */}
@@ -228,7 +233,7 @@ const App: React.FC = () => {
                     <BookOpenIcon />
                  </div>
                  <h3 className="text-xl font-display font-bold text-slate-700 dark:text-slate-300">Comece sua leitura</h3>
-                 <p className="text-slate-500 mt-2">Digite qualquer referência bíblica ou tema.</p>
+                 <p className="text-slate-500 mt-2">Selecione um livro, digite uma referência ou um tema.</p>
                  <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
                     <SuggestionButton 
                       text="João 3,16" 

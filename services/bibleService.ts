@@ -11,7 +11,7 @@ const getGeminiClient = () => {
   return new GoogleGenAI({ apiKey });
 };
 
-export const searchBible = async (query: string): Promise<SearchResult[]> => {
+export const searchBible = async (query: string, bookFilter?: string): Promise<SearchResult[]> => {
   if (!query || query.trim().length < 2) return [];
 
   const ai = getGeminiClient();
@@ -35,7 +35,7 @@ export const searchBible = async (query: string): Promise<SearchResult[]> => {
     },
   };
 
-  const prompt = `
+  let prompt = `
     Você é uma API de Busca Bíblica Católica Inteligente.
     O usuário pesquisou: "${query}".
 
@@ -46,7 +46,16 @@ export const searchBible = async (query: string): Promise<SearchResult[]> => {
     4. Se for uma referência (ex: "Gen 3,15-20"), retorne TODOS os versículos do intervalo solicitado.
     5. Se for uma palavra-chave, retorne os 10 versículos mais relevantes teologicamente.
     6. Mantenha a fidelidade total ao texto bíblico.
+  `;
 
+  if (bookFilter) {
+    prompt += `
+    7. FILTRO ATIVO: O usuário restringiu a busca EXCLUSIVAMENTE ao livro: "${bookFilter}". 
+       IGNORE versículos de outros livros, mesmo que sejam relevantes. Retorne resultados apenas de ${bookFilter}.
+    `;
+  }
+
+  prompt += `
     Retorne APENAS o JSON array.
   `;
 
