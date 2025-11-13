@@ -9,8 +9,6 @@ const getGeminiClient = () => {
 
 export const generateCatholicCommentary = async (verse: BibleVerse): Promise<string> => {
   const ai = getGeminiClient();
-  if (!ai) {
-    throw new Error("Chave de API não configurada.");
   }
 
   const prompt = `
