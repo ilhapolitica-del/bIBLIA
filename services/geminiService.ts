@@ -2,10 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { BibleVerse } from "../types";
 
 const getGeminiClient = () => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) {
-    console.error("API_KEY is missing.");
-    return null;
+  const apiKey = "AIzaSyCn7MOMMciECPjeWC-FaHmSxDOZZubhpus";ll;
   }
   return new GoogleGenAI({ apiKey });
 };
