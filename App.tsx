@@ -142,7 +142,8 @@ const App: React.FC = () => {
   }, [commentary.forReference, commentary.content]);
 
   return (
-    <HashRouter basename="/bIBLIA/">      <div className="min-h-screen flex flex-col">
+    <HashRouter>
+      <div className="min-h-screen flex flex-col">
         <Header darkMode={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} />
 
         <main className="flex-grow container mx-auto px-4 py-8 max-w-5xl">
