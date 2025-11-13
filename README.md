@@ -18,3 +18,11 @@ View your app in AI Studio: https://ai.studio/apps/drive/1RGtLl1VdPxrhFa67imBflb
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+
+## Deployment
+
+The site is deployed on Vercel at: https://verbum-dei-biblia.vercel.app
+
+**Environment Variables Required:**
+- `VITE_GEMINI_API_KEY`: Google Gemini API key for theological commentary generation
