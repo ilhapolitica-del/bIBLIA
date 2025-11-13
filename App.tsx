@@ -3,8 +3,9 @@ import { Header } from './components/Header';
 import { SearchBar } from './components/SearchBar';
 import { SearchResultCard } from './components/SearchResultCard';
 import { CommentaryPanel } from './components/CommentaryPanel';
+import { CrossReferencesPanel } from './components/CrossReferencesPanel';
 import { searchBible } from './services/bibleService';
-import { generateCatholicCommentary } from './services/geminiService';
+import { generateCatholicCommentary, generateCrossReferences } from './services/geminiService';
 import { BibleVerse, SearchResult, CommentaryState } from './types';
 import { HashRouter } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
@@ -19,7 +20,9 @@ const App: React.FC = () => {
     isLoading: false,
     content: null,
     error: null,
-    forReference: null
+    forReference: null,
+    isCrossRefLoading: false,
+    crossReferences: null
   });
 
   // Handle Dark Mode System Preference
@@ -44,7 +47,14 @@ const App: React.FC = () => {
       setIsSearching(true);
       setResults([]); // Clear previous results immediately
       setSelectedVerse(null);
-      setCommentary({ isLoading: false, content: null, error: null, forReference: null });
+      setCommentary({ 
+        isLoading: false, 
+        content: null, 
+        error: null, 
+        forReference: null,
+        isCrossRefLoading: false,
+        crossReferences: null
+      });
 
       try {
         const searchResults = await searchBible(query);
@@ -84,29 +94,51 @@ const App: React.FC = () => {
       return;
     }
 
+    // Reset state for new verse
     setCommentary({
       isLoading: true,
       content: null,
       error: null,
-      forReference: referenceKey
+      forReference: referenceKey,
+      isCrossRefLoading: true,
+      crossReferences: null
     });
 
-    try {
-      const text = await generateCatholicCommentary(verse);
-      setCommentary({
-        isLoading: false,
-        content: text,
-        error: null,
-        forReference: referenceKey
+    // 1. Fetch Commentary
+    generateCatholicCommentary(verse)
+      .then(text => {
+        setCommentary(prev => ({
+          ...prev,
+          isLoading: false,
+          content: text,
+        }));
+      })
+      .catch(err => {
+        setCommentary(prev => ({
+          ...prev,
+          isLoading: false,
+          error: "Não foi possível carregar o comentário. Verifique sua conexão ou chave de API.",
+        }));
       });
-    } catch (err) {
-      setCommentary({
-        isLoading: false,
-        content: null,
-        error: "Não foi possível carregar o comentário. Verifique sua conexão ou chave de API.",
-        forReference: referenceKey
+
+    // 2. Fetch Cross References (Parallel)
+    generateCrossReferences(verse)
+      .then(refs => {
+        setCommentary(prev => ({
+          ...prev,
+          isCrossRefLoading: false,
+          crossReferences: refs
+        }));
+      })
+      .catch(err => {
+        console.error("Failed to fetch cross refs", err);
+        setCommentary(prev => ({
+          ...prev,
+          isCrossRefLoading: false,
+          crossReferences: []
+        }));
       });
-    }
+
   }, [commentary.forReference, commentary.content]);
 
   return (
@@ -165,7 +197,7 @@ const App: React.FC = () => {
             <div className={`lg:col-span-2 lg:sticky lg:top-24 ${isSearching ? 'hidden lg:block opacity-50' : ''}`}>
               {selectedVerse ? (
                 <>
-                  <div className="bg-gold-50 dark:bg-slate-800/30 border border-gold-200 dark:border-gold-900/30 p-4 rounded-lg mb-4">
+                  <div className="bg-gold-5 dark:bg-slate-800/30 border border-gold-200 dark:border-gold-900/30 p-4 rounded-lg mb-4">
                      <h4 className="font-display font-bold text-crimson-900 dark:text-gold-500 mb-2 border-b border-gold-200 dark:border-slate-700 pb-2">
                        {selectedVerse.book} {selectedVerse.chapter}, {selectedVerse.verse}
                      </h4>
@@ -174,6 +206,10 @@ const App: React.FC = () => {
                      </p>
                   </div>
                   <CommentaryPanel commentary={commentary} />
+                  <CrossReferencesPanel 
+                    references={commentary.crossReferences} 
+                    isLoading={commentary.isCrossRefLoading} 
+                  />
                 </>
               ) : (
                  results.length > 0 && !isSearching && (

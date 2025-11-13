@@ -10,11 +10,19 @@ export interface SearchResult {
   relevance: number; // Simple relevance score
 }
 
+export interface CrossReference {
+  reference: string;
+  text: string;
+  reason: string;
+}
+
 export interface CommentaryState {
   isLoading: boolean;
   content: string | null;
   error: string | null;
   forReference: string | null; // Stores "John 3:16" to ensure commentary matches view
+  isCrossRefLoading: boolean;
+  crossReferences: CrossReference[] | null;
 }
 
 export enum BibleBookGroup {
