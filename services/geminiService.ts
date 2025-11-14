@@ -2,7 +2,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { BibleVerse, CrossReference, CommentaryContent } from "../types";
 
 const getGeminiClient = () => {
-import.meta.env.VITE_GEMINI_API_KEY  if (!apiKey) {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
     console.error("API_KEY is missing.");
     return null;
   }
