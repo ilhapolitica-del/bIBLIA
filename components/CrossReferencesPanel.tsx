@@ -60,10 +60,10 @@ export const CrossReferencesPanel: React.FC<CrossReferencesPanelProps> = ({ refe
                         {ref.reference}
                       </span>
                     </div>
-                    <p className="text-slate-600 dark:text-slate-300 italic font-serif text-sm mb-2">
+                    <p className="text-slate-600 dark:text-slate-300 italic font-serif text-base mb-2">
                       "{ref.text}"
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 bg-paper-50 dark:bg-slate-900/50 p-2 rounded">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 bg-paper-50 dark:bg-slate-900/50 p-2 rounded">
                       <span className="font-semibold">Conexão:</span> {ref.reason}
                     </p>
                   </div>

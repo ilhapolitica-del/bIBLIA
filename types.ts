@@ -8,6 +8,7 @@ export interface BibleVerse {
 export interface SearchResult {
   verse: BibleVerse;
   relevance: number; // Simple relevance score
+  isPrimary?: boolean;
 }
 
 export interface CrossReference {

@@ -30,6 +30,7 @@ export const searchBible = async (query: string, bookFilter?: string): Promise<S
         chapter: { type: Type.INTEGER, description: "Número do capítulo" },
         verse: { type: Type.INTEGER, description: "Número do versículo" },
         text: { type: Type.STRING, description: "Texto do versículo na tradução católica (Ave Maria ou CNBB)" },
+        isPrimary: { type: Type.BOOLEAN, description: "Verdadeiro se este é um dos 1-3 versículos mais centrais e teologicamente importantes para a consulta do usuário." },
       },
       required: ["book", "chapter", "verse", "text"],
     },
@@ -44,7 +45,7 @@ export const searchBible = async (query: string, bookFilter?: string): Promise<S
     2. Retorne os versículos exatos da BÍBLIA CATÓLICA (incluindo deuterocanônicos se necessário: Tobias, Judite, 1 e 2 Macabeus, Sabedoria, Eclesiástico, Baruc).
     3. Use a tradução "Bíblia Ave Maria" ou "CNBB".
     4. Se for uma referência (ex: "Gen 3,15-20"), retorne TODOS os versículos do intervalo solicitado.
-    5. Se for uma palavra-chave, retorne os 10 versículos mais relevantes teologicamente.
+    5. Se for uma palavra-chave, retorne os 10 versículos mais relevantes teologicamente. DENTRE ELES, marque os 1 a 3 mais importantes com 'isPrimary: true'.
     6. Mantenha a fidelidade total ao texto bíblico.
   `;
 
@@ -81,7 +82,8 @@ export const searchBible = async (query: string, bookFilter?: string): Promise<S
           verse: v.verse,
           text: v.text
         },
-        relevance: 100
+        relevance: 100,
+        isPrimary: v.isPrimary || false,
       }));
     }
     return [];

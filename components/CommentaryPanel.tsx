@@ -48,7 +48,7 @@ export const CommentaryPanel: React.FC<CommentaryPanelProps> = ({ commentary }) 
                 </h3>
               </div>
               <div className="prose prose-stone dark:prose-invert max-w-none">
-                <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-serif text-base text-justify">
+                <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-serif text-lg text-justify">
                   {commentary.content?.theological}
                 </p>
               </div>
@@ -64,7 +64,7 @@ export const CommentaryPanel: React.FC<CommentaryPanelProps> = ({ commentary }) 
               </div>
               
               <div className="relative pl-4 border-l-4 border-crimson-800 dark:border-gold-600">
-                <p className="text-slate-700 dark:text-slate-300 italic font-serif text-base text-justify leading-relaxed mb-2">
+                <p className="text-slate-700 dark:text-slate-300 italic font-serif text-lg text-justify leading-relaxed mb-2">
                   "{commentary.content?.patristic}"
                 </p>
                 <div className="flex items-center gap-2 text-sm font-bold text-crimson-900 dark:text-gold-400 mt-2 font-display uppercase tracking-wide">
