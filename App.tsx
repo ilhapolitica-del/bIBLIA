@@ -9,7 +9,7 @@ import { ReadingModeToggle } from './components/ReadingModeToggle';
 import { searchBible } from './services/bibleService';
 import { generateCatholicCommentary, generateCrossReferences } from './services/geminiService';
 import { BibleVerse, SearchResult, CommentaryState } from './types';
-import { HashRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -157,7 +157,7 @@ const App: React.FC = () => {
   }, [commentary.forReference, commentary.content]);
 
   return (
-    <HashRouter>
+    <BrowserRouter>
       <div className={`min-h-screen flex flex-col ${readingMode ? 'bg-paper-50 dark:bg-slate-900' : ''}`}>
         {!readingMode && <Header darkMode={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} />}
 
@@ -297,7 +297,7 @@ const App: React.FC = () => {
           />
         )}
       </div>
-    </HashRouter>
+    </BrowserRouter>
   );
 };
 
