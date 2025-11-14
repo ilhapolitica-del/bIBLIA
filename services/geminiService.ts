@@ -3,7 +3,8 @@ import { BibleVerse, CrossReference, CommentaryContent } from "../types";
 
 const getGeminiClient = () => {
   const apiKey =  import.meta.env.VITE_GEMINI_API_KEY;
-  if (!apiKey) {
+console.log('VITE_GEMINI_API_KEY:', apiKey); // DEBUG
+    if (!apiKey) {
     console.error("API_KEY is missing.");
     return null;
   }
