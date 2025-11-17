@@ -9,7 +9,7 @@ import { ReadingModeToggle } from './components/ReadingModeToggle';
 import { SavedCommentariesModal } from './components/SavedCommentariesModal';
 import { NotePanel } from './components/NotePanel';
 import { searchBible } from './services/bibleService';
-import { generateCatholicCommentary, generateCrossReferences } from './services/geminiService';
+import { generateCatholicCommentary, generateCrossReferences, generateJerusalemCommentary } from './services/geminiService';
 import { BibleVerse, SearchResult, CommentaryState, SavedCommentary, Highlights, HighlightColor, Notes } from './types';
 import { BrowserRouter } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
@@ -30,7 +30,8 @@ const App: React.FC = () => {
     error: null,
     forReference: null,
     isCrossRefLoading: false,
-    crossReferences: null
+    crossReferences: null,
+    isJerusalemLoading: false,
   });
   const [savedCommentaries, setSavedCommentaries] = useState<SavedCommentary[]>([]);
   const [isSavedModalOpen, setIsSavedModalOpen] = useState(false);
@@ -105,7 +106,7 @@ const App: React.FC = () => {
     setIsSearching(true);
     setResults([]);
     setSelectedVerse(null);
-    setCommentary({ isLoading: false, content: null, error: null, forReference: null, isCrossRefLoading: false, crossReferences: null });
+    setCommentary({ isLoading: false, content: null, error: null, forReference: null, isCrossRefLoading: false, crossReferences: null, isJerusalemLoading: false });
     updateHistory(trimmedSearchTerm);
 
     try {
@@ -146,13 +147,33 @@ const App: React.FC = () => {
     setSelectedVerse(verse);
     if (commentary.forReference === referenceKey) return;
 
-    setCommentary({ isLoading: true, content: null, error: null, forReference: referenceKey, isCrossRefLoading: true, crossReferences: null });
+    setCommentary({ isLoading: true, content: null, error: null, forReference: referenceKey, isCrossRefLoading: true, crossReferences: null, isJerusalemLoading: true });
+    
     generateCatholicCommentary(verse)
-      .then(data => setCommentary(prev => ({ ...prev, isLoading: false, content: data })))
+      .then(data => setCommentary(prev => ({ ...prev, isLoading: false, content: { ...prev.content, ...data } })))
       .catch(err => setCommentary(prev => ({ ...prev, isLoading: false, error: "Não foi possível carregar o comentário." })));
+    
     generateCrossReferences(verse)
       .then(refs => setCommentary(prev => ({ ...prev, isCrossRefLoading: false, crossReferences: refs })))
       .catch(err => { console.error("Failed to fetch cross refs", err); setCommentary(prev => ({ ...prev, isCrossRefLoading: false, crossReferences: [] })); });
+      
+    generateJerusalemCommentary(verse)
+      .then(jerusalemText => setCommentary(prev => ({
+        ...prev,
+        isJerusalemLoading: false,
+        content: {
+          theological: prev.content?.theological ?? '',
+          patristic: prev.content?.patristic ?? '',
+          patristicSource: prev.content?.patristicSource ?? '',
+          ...prev.content,
+          jerusalem: jerusalemText,
+        }
+      })))
+      .catch(err => {
+        console.error("Failed to fetch Jerusalem commentary", err);
+        setCommentary(prev => ({ ...prev, isJerusalemLoading: false }));
+      });
+
   }, [selectedVerse, commentary.forReference]);
 
   const isCurrentCommentarySaved = useMemo(() => {
@@ -291,7 +312,7 @@ const App: React.FC = () => {
                 {selectedVerse ? (
                   <>
                     <div className="bg-gold-5 dark:bg-slate-800/30 border border-gold-200 dark:border-gold-900/30 p-4 rounded-lg mb-4">
-                      <h4 className="font-display font-bold text-crimson-900 dark:text-gold-500 mb-2 border-b border-gold-200 dark:border-slate-700 pb-2">{selectedVerse.book} {selectedVerse.chapter}, {selectedVerse.verse}</h4>
+                      <h4 className="font-display font-bold text-crimson-900 dark:text-gold-500 mb-2 border-b border-gold-200 dark:border-slate-700 pb-2">{`${selectedVerse.book} ${selectedVerse.chapter}, ${selectedVerse.verse}`}</h4>
                       <p className="font-serif text-slate-800 dark:text-slate-300 text-lg italic">"{selectedVerse.text}"</p>
                     </div>
                     <CommentaryPanel commentary={commentary} onSave={handleSaveCommentary} isSaved={isCurrentCommentarySaved} />

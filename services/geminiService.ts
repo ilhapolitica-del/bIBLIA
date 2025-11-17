@@ -10,7 +10,7 @@ const getGeminiClient = () => {
   return new GoogleGenAI({ apiKey });
 };
 
-export const generateCatholicCommentary = async (verse: BibleVerse): Promise<CommentaryContent> => {
+export const generateCatholicCommentary = async (verse: BibleVerse): Promise<Omit<CommentaryContent, 'jerusalem'>> => {
   const ai = getGeminiClient();
   if (!ai) {
     throw new Error("Chave de API não configurada.");
@@ -65,12 +65,55 @@ export const generateCatholicCommentary = async (verse: BibleVerse): Promise<Com
     });
     
     if (response.text) {
-      return JSON.parse(response.text) as CommentaryContent;
+      return JSON.parse(response.text);
     }
     throw new Error("Resposta vazia.");
   } catch (error) {
     console.error("Erro ao gerar comentário:", error);
     throw new Error("Erro ao conectar com o serviço de teologia.");
+  }
+};
+
+export const generateJerusalemCommentary = async (verse: BibleVerse): Promise<string> => {
+  const ai = getGeminiClient();
+  if (!ai) {
+    throw new Error("Chave de API não configurada.");
+  }
+
+  const prompt = `
+    Atue como um editor especialista da Bíblia de Jerusalém. Sua tarefa é fornecer uma nota de rodapé concisa para a seguinte passagem, seguindo estritamente o estilo da Bíblia de Jerusalém.
+
+    Passagem:
+    Livro: ${verse.book}
+    Capítulo: ${verse.chapter}
+    Versículo: ${verse.verse}
+    Texto: "${verse.text}"
+
+    Diretrizes do Estilo da Bíblia de Jerusalém:
+    1.  **Foco Histórico-Crítico:** A análise deve se concentrar no contexto histórico, nas fontes do texto (ex: tradição javista, eloísta), na filologia (significado original das palavras em hebraico/grego) e nas variantes textuais.
+    2.  **Conciso e denso:** A nota deve ser curta, informativa e direta, como uma nota de rodapé. Evite linguagem devocional ou pastoral.
+    3.  **Objetividade acadêmica:** Apresente a informação de forma neutra e acadêmica.
+    4.  **Referências Cruzadas:** Se relevante, mencione brevemente outras passagens (AT ou NT) para contextualizar, mas sem longas explicações.
+
+    Gere APENAS o texto da nota de rodapé. Não inclua títulos como "Nota da Bíblia de Jerusalém".
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        temperature: 0.3,
+      }
+    });
+
+    if (response.text) {
+      return response.text;
+    }
+    throw new Error("Resposta vazia da IA.");
+  } catch (error) {
+    console.error("Erro ao gerar comentário da Bíblia de Jerusalém:", error);
+    throw new Error("Não foi possível gerar a nota no estilo da Bíblia de Jerusalém.");
   }
 };
 

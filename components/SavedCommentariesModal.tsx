@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Bookmark, Trash2, FileText, Scroll, User, Sparkles } from 'lucide-react';
+import { X, Bookmark, Trash2, FileText, Scroll, User, Sparkles, BookOpen } from 'lucide-react';
 import { SavedCommentary } from '../types';
 
 interface SavedCommentariesModalProps {
@@ -74,20 +74,36 @@ export const SavedCommentariesModal: React.FC<SavedCommentariesModalProps> = ({
                   </div>
                   
                   <div className="mt-2 pt-3 border-t border-paper-200 dark:border-slate-700 space-y-4">
-                    <div>
-                      <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                        <Sparkles size={16} className="text-gold-600 dark:text-gold-400" />
-                        <span>Comentário Teológico</span>
+                    {item.content.theological && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                          <Sparkles size={16} className="text-gold-600 dark:text-gold-400" />
+                          <span>Comentário Teológico</span>
+                        </div>
+                        <p className="font-serif text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{item.content.theological}</p>
                       </div>
-                      <p className="font-serif text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{item.content.theological}</p>
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                        <Scroll size={16} className="text-crimson-800 dark:text-gold-500" />
-                        <span>Voz da Tradição: <span className="font-bold">{item.content.patristicSource}</span></span>
+                    )}
+                    {item.content.patristic && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                          <Scroll size={16} className="text-crimson-800 dark:text-gold-500" />
+                          <span>Voz da Tradição: <span className="font-bold">{item.content.patristicSource}</span></span>
+                        </div>
+                        <p className="font-serif text-sm text-slate-700 dark:text-slate-300 leading-relaxed italic">"{item.content.patristic}"</p>
                       </div>
-                       <p className="font-serif text-sm text-slate-700 dark:text-slate-300 leading-relaxed italic">"{item.content.patristic}"</p>
-                    </div>
+                    )}
+                    {item.content.jerusalem && (
+                       <div>
+                        <div className="flex items-center gap-2 mb-1 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                          <BookOpen size={16} className="text-crimson-800 dark:text-gold-500" />
+                          <span>Nota da Bíblia de Jerusalém</span>
+                        </div>
+                        <p className="text-xs italic text-slate-500 dark:text-slate-400 mb-2">
+                          Gerado no estilo histórico-crítico.
+                        </p>
+                        <p className="font-serif text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{item.content.jerusalem}</p>
+                      </div>
+                    )}
                   </div>
                    <p className="text-right text-xs text-slate-400 dark:text-slate-500 mt-3">
                      Salvo em: {new Date(item.savedAt).toLocaleDateString('pt-BR')}

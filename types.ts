@@ -21,6 +21,7 @@ export interface CommentaryContent {
   theological: string;
   patristic: string;
   patristicSource: string; // e.g., "Saint Augustine"
+  jerusalem?: string; // Commentary in the style of the Jerusalem Bible
 }
 
 export interface CommentaryState {
@@ -30,6 +31,7 @@ export interface CommentaryState {
   forReference: string | null; // Stores "John 3:16" to ensure commentary matches view
   isCrossRefLoading: boolean;
   crossReferences: CrossReference[] | null;
+  isJerusalemLoading: boolean;
 }
 
 export interface SavedCommentary {
@@ -58,5 +60,5 @@ export interface Highlights {
 }
 
 export interface Notes {
-  [verseId: string]: string;
+  [verseId:string]: string;
 }

@@ -9,7 +9,7 @@ interface CommentaryPanelProps {
 }
 
 export const CommentaryPanel: React.FC<CommentaryPanelProps> = ({ commentary, onSave, isSaved }) => {
-  if (!commentary.isLoading && !commentary.content && !commentary.error) return null;
+  if (!commentary.isLoading && !commentary.content && !commentary.error && !commentary.isJerusalemLoading) return null;
 
   const canSave = commentary.content && !commentary.isLoading;
 
@@ -44,39 +44,68 @@ export const CommentaryPanel: React.FC<CommentaryPanelProps> = ({ commentary, on
         ) : (
           <>
             {/* Theological Section */}
-            <div className="p-6 pb-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="text-gold-600 dark:text-gold-400" size={20} />
-                <h3 className="font-display font-bold text-lg text-slate-900 dark:text-paper-50">
-                  Comentário Teológico
-                </h3>
-              </div>
-              <div className="prose prose-stone dark:prose-invert max-w-none">
-                <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-serif text-lg text-justify">
-                  {commentary.content?.theological}
-                </p>
-              </div>
-            </div>
-
-            {/* Patristic Section */}
-            <div className="bg-white/50 dark:bg-slate-900/30 p-6 pt-4 border-t border-gold-500/20">
-              <div className="flex items-center gap-2 mb-3">
-                <Scroll className="text-crimson-800 dark:text-gold-500" size={20} />
-                <h3 className="font-display font-bold text-lg text-crimson-900 dark:text-gold-100">
-                  Voz da Tradição
-                </h3>
-              </div>
-              
-              <div className="relative pl-4 border-l-4 border-crimson-800 dark:border-gold-600">
-                <p className="text-slate-700 dark:text-slate-300 italic font-serif text-lg text-justify leading-relaxed mb-2">
-                  "{commentary.content?.patristic}"
-                </p>
-                <div className="flex items-center gap-2 text-sm font-bold text-crimson-900 dark:text-gold-400 mt-2 font-display uppercase tracking-wide">
-                  <User size={14} />
-                  <span>{commentary.content?.patristicSource}</span>
+            {commentary.content?.theological && (
+              <div className="p-6 pb-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="text-gold-600 dark:text-gold-400" size={20} />
+                  <h3 className="font-display font-bold text-lg text-slate-900 dark:text-paper-50">
+                    Comentário Teológico
+                  </h3>
+                </div>
+                <div className="prose prose-stone dark:prose-invert max-w-none">
+                  <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-serif text-lg text-justify">
+                    {commentary.content.theological}
+                  </p>
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* Patristic Section */}
+            {commentary.content?.patristic && (
+              <div className="bg-white/50 dark:bg-slate-900/30 p-6 pt-4 border-t border-gold-500/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <Scroll className="text-crimson-800 dark:text-gold-500" size={20} />
+                  <h3 className="font-display font-bold text-lg text-slate-900 dark:text-paper-50">
+                    Voz da Tradição
+                  </h3>
+                </div>
+                
+                <div className="relative pl-4 border-l-4 border-crimson-800 dark:border-gold-600">
+                  <p className="text-slate-700 dark:text-slate-300 italic font-serif text-lg text-justify leading-relaxed mb-2">
+                    "{commentary.content.patristic}"
+                  </p>
+                  <div className="flex items-center gap-2 text-sm font-bold text-crimson-900 dark:text-gold-400 mt-2 font-display uppercase tracking-wide">
+                    <User size={14} />
+                    <span>{commentary.content.patristicSource}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Jerusalem Bible Note Section */}
+            {(commentary.isJerusalemLoading || commentary.content?.jerusalem) && (
+              <div className="p-6 pt-4 border-t border-gold-500/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <BookOpen className="text-crimson-800 dark:text-gold-500" size={20} />
+                  <h3 className="font-display font-bold text-lg text-slate-900 dark:text-paper-50">
+                    Nota da Bíblia de Jerusalém
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 italic">
+                  Comentário gerado por IA no estilo histórico-crítico característico das notas de rodapé desta tradução.
+                </p>
+                {commentary.isJerusalemLoading ? (
+                    <div className="space-y-2 animate-pulse">
+                        <div className="h-3 bg-slate-300 dark:bg-slate-700 rounded w-full"></div>
+                        <div className="h-3 bg-slate-300 dark:bg-slate-700 rounded w-5/6"></div>
+                    </div>
+                ) : commentary.content?.jerusalem ? (
+                    <p className="text-slate-700 dark:text-slate-300 font-serif text-base text-justify leading-relaxed">
+                    {commentary.content.jerusalem}
+                    </p>
+                ) : null}
+              </div>
+            )}
 
             {/* Footer */}
             <div className="px-6 py-3 bg-slate-50 dark:bg-slate-900/50 text-xs text-slate-500 dark:text-slate-400 flex justify-between items-center border-t border-slate-200 dark:border-slate-800">
