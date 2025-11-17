@@ -1,13 +1,17 @@
 import React from 'react';
-import { BookOpen, Sparkles, Scroll, User } from 'lucide-react';
+import { BookOpen, Sparkles, Scroll, User, Bookmark, BookmarkCheck } from 'lucide-react';
 import { CommentaryState } from '../types';
 
 interface CommentaryPanelProps {
   commentary: CommentaryState;
+  onSave: () => void;
+  isSaved: boolean;
 }
 
-export const CommentaryPanel: React.FC<CommentaryPanelProps> = ({ commentary }) => {
+export const CommentaryPanel: React.FC<CommentaryPanelProps> = ({ commentary, onSave, isSaved }) => {
   if (!commentary.isLoading && !commentary.content && !commentary.error) return null;
+
+  const canSave = commentary.content && !commentary.isLoading;
 
   return (
     <div className="mt-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -76,7 +80,14 @@ export const CommentaryPanel: React.FC<CommentaryPanelProps> = ({ commentary }) 
 
             {/* Footer */}
             <div className="px-6 py-3 bg-slate-50 dark:bg-slate-900/50 text-xs text-slate-500 dark:text-slate-400 flex justify-between items-center border-t border-slate-200 dark:border-slate-800">
-              <span>Fiel ao Magistério da Igreja Católica</span>
+              <button
+                onClick={onSave}
+                disabled={!canSave || isSaved}
+                className="flex items-center gap-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-gold-600 dark:hover:text-gold-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isSaved ? <BookmarkCheck size={16} className="text-green-600" /> : <Bookmark size={16} />}
+                <span>{isSaved ? 'Salvo' : 'Salvar Comentário'}</span>
+              </button>
               <span className="font-display text-gold-600 dark:text-gold-400">Verbum Dei AI</span>
             </div>
           </>

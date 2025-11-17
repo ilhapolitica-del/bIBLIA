@@ -32,6 +32,13 @@ export interface CommentaryState {
   crossReferences: CrossReference[] | null;
 }
 
+export interface SavedCommentary {
+  id: string;
+  verse: BibleVerse;
+  content: CommentaryContent;
+  savedAt: string; // ISO date string
+}
+
 export enum BibleBookGroup {
   PENTATEUCH = "Pentateuco",
   HISTORICAL = "Livros Históricos",
@@ -42,4 +49,14 @@ export enum BibleBookGroup {
   PAULINE_EPISTLES = "Cartas Paulinas",
   GENERAL_EPISTLES = "Cartas Católicas",
   REVELATION = "Apocalipse"
+}
+
+export type HighlightColor = 'yellow' | 'green' | 'blue' | 'pink';
+
+export interface Highlights {
+  [verseId: string]: HighlightColor;
+}
+
+export interface Notes {
+  [verseId: string]: string;
 }

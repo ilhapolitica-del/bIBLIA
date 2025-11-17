@@ -1,5 +1,14 @@
 import { BibleVerse, BibleBookGroup } from './types';
 
+export const BIBLE_TRANSLATIONS: Record<string, string> = {
+  "AVE_MARIA": "Bíblia Ave Maria (Português)",
+  "CNBB": "Bíblia CNBB (Português)",
+  "JERUSALEM": "Bíblia de Jerusalém (Português)",
+  "NVI": "Nova Versão Internacional (Português)",
+  "VULGATA": "Vulgata Clementina (Latim)",
+  "DOUAY_RHEIMS": "Douay-Rheims (Inglês)",
+};
+
 // Complete List of Catholic Bible Books
 export const CATHOLIC_BOOKS: Record<string, BibleBookGroup> = {
   // Old Testament

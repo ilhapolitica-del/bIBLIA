@@ -1,5 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { SearchResult } from '../types';
+import { BIBLE_TRANSLATIONS } from "../constants";
 
 // Initialize Gemini Client
 const getGeminiClient = () => {
@@ -11,14 +12,29 @@ const getGeminiClient = () => {
   return new GoogleGenAI({ apiKey });
 };
 
-export const searchBible = async (query: string, bookFilter?: string): Promise<SearchResult[]> => {
-  if (!query || query.trim().length < 2) return [];
+export const searchBible = async (query: string, bookFilter?: string, translationKey?: string): Promise<SearchResult[]> => {
+  const trimmedQuery = query.trim();
+  if (!trimmedQuery) return [];
+
+  // Allow short queries (e.g., for chapters) only if a book is selected to provide context.
+  if (trimmedQuery.length < 2 && !bookFilter) {
+    return [];
+  }
 
   const ai = getGeminiClient();
   if (!ai) {
     console.error("AI Client not initialized");
     return [];
   }
+
+  let effectiveQuery = trimmedQuery;
+  // If a book is selected and the query is just a number, it's likely a chapter search.
+  // Combine them to form a clearer query for the AI model.
+  if (bookFilter && /^\d+$/.test(effectiveQuery)) {
+    effectiveQuery = `${bookFilter} ${effectiveQuery}`;
+  }
+
+  const translationName = translationKey ? BIBLE_TRANSLATIONS[translationKey] : "Bíblia Ave Maria (Português)";
 
   // Schema strictness ensures we get valid JSON back for our frontend
   const responseSchema = {
@@ -29,7 +45,7 @@ export const searchBible = async (query: string, bookFilter?: string): Promise<S
         book: { type: Type.STRING, description: "Nome do livro bíblico em Português (Canon Católico)" },
         chapter: { type: Type.INTEGER, description: "Número do capítulo" },
         verse: { type: Type.INTEGER, description: "Número do versículo" },
-        text: { type: Type.STRING, description: "Texto do versículo na tradução católica (Ave Maria ou CNBB)" },
+        text: { type: Type.STRING, description: `Texto do versículo na tradução: ${translationName}` },
         isPrimary: { type: Type.BOOLEAN, description: "Verdadeiro se este é um dos 1-3 versículos mais centrais e teologicamente importantes para a consulta do usuário." },
       },
       required: ["book", "chapter", "verse", "text"],
@@ -38,20 +54,21 @@ export const searchBible = async (query: string, bookFilter?: string): Promise<S
 
   let prompt = `
     Você é uma API de Busca Bíblica Católica Inteligente.
-    O usuário pesquisou: "${query}".
+    O usuário pesquisou: "${effectiveQuery}".
 
     TAREFA:
-    1. Identifique se a busca é uma referência específica (ex: "Gn 3,15-20", "João 3:16") ou uma busca por palavra-chave (ex: "Fé", "Eucaristia").
+    1. ANALISE a busca. É uma referência específica (ex: "Gn 3,15-20"), uma busca por capítulo inteiro (ex: "Gênesis 3", "Salmos 23"), ou uma busca por palavra-chave (ex: "Fé", "Eucaristia").
     2. Retorne os versículos exatos da BÍBLIA CATÓLICA (incluindo deuterocanônicos se necessário: Tobias, Judite, 1 e 2 Macabeus, Sabedoria, Eclesiástico, Baruc).
-    3. Use a tradução "Bíblia Ave Maria" ou "CNBB".
-    4. Se for uma referência (ex: "Gen 3,15-20"), retorne TODOS os versículos do intervalo solicitado.
-    5. Se for uma palavra-chave, retorne os 10 versículos mais relevantes teologicamente. DENTRE ELES, marque os 1 a 3 mais importantes com 'isPrimary: true'.
-    6. Mantenha a fidelidade total ao texto bíblico.
+    3. Use a tradução BÍBLICA ESPECÍFICA: "${translationName}". Se a tradução não for em português (ex: Vulgata, King James), retorne o texto nessa língua.
+    4. Se for uma referência de capítulo inteiro (ex: "Gênesis 3"), retorne TODOS os versículos do capítulo solicitado, em ordem sequencial.
+    5. Se for uma referência com intervalo (ex: "Gen 3,15-20"), retorne TODOS os versículos do intervalo solicitado.
+    6. Se for uma palavra-chave, retorne os 10 versículos mais relevantes teologicamente. DENTRE ELES, marque os 1 a 3 mais importantes com 'isPrimary: true'.
+    7. Mantenha a fidelidade total ao texto bíblico.
   `;
 
   if (bookFilter) {
     prompt += `
-    7. FILTRO ATIVO: O usuário restringiu a busca EXCLUSIVAMENTE ao livro: "${bookFilter}". 
+    8. FILTRO ATIVO: O usuário restringiu a busca EXCLUSIVAMENTE ao livro: "${bookFilter}". 
        IGNORE versículos de outros livros, mesmo que sejam relevantes. Retorne resultados apenas de ${bookFilter}.
     `;
   }
